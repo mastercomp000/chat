@@ -1,0 +1,22 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/mastercomp000/chat.git"
+  },
+  "author": "“Pavlo <“mastercomp000@gmail.com”>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mastercomp000/chat/issues"
+  },
+  "homepage": "https://github.com/mastercomp000/chat#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
