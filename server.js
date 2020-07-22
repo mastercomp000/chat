@@ -9,16 +9,26 @@ const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
+const pgp = require('pg-promise')()
+
+
+const db = pgp('postgresql://local_user:user@localhost:5432/local_user')
+
 
 const initializePassport = require('./passport-config')
-initializePassport(
-    passport,
-    email => users.find(user => user.email === email),
-    id => users.find(user => user.id === id)
-)
 
+db.any("SELECT * FROM users")
+    .then(users => {
+        console.log(users)
+        initializePassport(
+            passport,
+            email => users.find(user => user.email === email),
+            created_at => users.find(user => user.created_at === created_at)
+        )
 
-const users = []
+    }).catch(e => {
+        console.error(e)
+    })
 
 app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
@@ -44,20 +54,21 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs')
 })
 
-app.post('/register', checkNotAuthenticated, async(req, res) => {
+app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
-        users.push({
-            id: Date.now().toString(),
-            name: req.body.name,
-            email: req.body.email,
-            password: hashedPassword
-        })
-        res.redirect('/login')
+
+        db.none('INSERT INTO users(name, email, password_hash, created_at) VALUES($1, $2, $3, $4)',
+            [req.body.name, req.body.email, hashedPassword, Date.now().toString()])
+            .then(() => {
+                res.redirect('/login')
+            })
+            .catch(e => {
+                console.error(e)
+            });
     } catch {
         res.redirect('/register')
     }
-    //console.log(users)
     req.body.email
 })
 
